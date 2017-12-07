@@ -53,28 +53,32 @@ def RC4(key):
     return PRGA(S)
 
 
+def __convert_key(s):
+    return [ord(c) for c in s]
+
+
+def __get_key():
+    key = 'better to keep the key scrambled if it is in the source code.'
+    return __convert_key(key)
+
+
+def encrypt(plain_text):
+    keystream = RC4(__get_key())
+    encrypted_plain_text = ''.join(["%02X" % (ord(character) ^ keystream.next()) for character in plain_text])
+    return encrypted_plain_text
+
+
+def decrypt(cipher_text):
+    keystream = RC4(__get_key())
+    decrypted_text = ''.join([chr(int(cipher_text[i:i+2], 16) ^ keystream.next()) for i in range(0, len(cipher_text), 2)])
+    return decrypted_text
+
+
 if __name__ == '__main__':
-    # test vectors are from http://en.wikipedia.org/wiki/RC4
+    plaintext = "Some Plain Text"
 
-    # ciphertext should be BBF316E8D940AF0AD3
-    key = 'Key'
-    plaintext = 'Plaintext'
+    cipher_text = encrypt(plaintext)
+    print cipher_text
 
-    # ciphertext should be 1021BF0420
-    #key = 'Wiki'
-    #plaintext = 'pedia'
-
-    # ciphertext should be 45A01F645FC35B383552544B9BF5
-    #key = 'Secret'
-    #plaintext = 'Attack at dawn'
-
-    def convert_key(s):
-        return [ord(c) for c in s]
-    key = convert_key(key)
-
-    keystream = RC4(key)
-
-    import sys
-    for c in plaintext:
-        sys.stdout.write("%02X" % (ord(c) ^ keystream.next()))
-    print
+    plain_text = decrypt(cipher_text)
+    print plain_text
